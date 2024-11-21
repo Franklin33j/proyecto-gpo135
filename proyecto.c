@@ -8,8 +8,11 @@ Jose Franklin Angel Guevara
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <fcntl.h>
+#include <string.h>
 
 void Gestion_Procesos(); 
+void Gestion_Almacenamiento();
 void Menu();
 
 int main()
@@ -35,7 +38,7 @@ int main()
             }
             else if (numero == 3)
             {
-                //Gestion_Procesos();
+                Gestion_Almacenamiento();
             }
             else if (numero == 4)
             {
@@ -109,4 +112,49 @@ void Gestion_Procesos()
 
         printf("El proceso hijo ha terminado.\n");
     }
+}
+
+void Gestion_Almacenamiento()
+{
+    const char *filename = "almacenamiento.txt"; // Nombre del archivo
+    char buffer[100]; // Buffer para lectura
+    const char *text = "Este es un ejemplo de escritura usando open(), write() y close().\n";
+
+    // Crear o abrir el archivo
+    int fd = open(filename, O_CREAT | O_RDWR, 0644); // Crear archivo si no existe
+    if (fd == -1)
+    {
+        perror("Error al abrir el archivo");
+        return;
+    }
+
+    // Escribir datos en el archivo
+    ssize_t bytes_written = write(fd, text, strlen(text));
+    if (bytes_written == -1)
+    {
+        perror("Error al escribir en el archivo");
+        close(fd);
+        return;
+    }
+
+    // Reposicionar el puntero del archivo al inicio
+    lseek(fd, 0, SEEK_SET);
+
+    // Leer datos del archivo
+    ssize_t bytes_read = read(fd, buffer, sizeof(buffer) - 1);
+    if (bytes_read == -1)
+    {
+        perror("Error al leer el archivo");
+        close(fd);
+        return;
+    }
+
+    // Asegurar que el buffer sea una cadena válida
+    buffer[bytes_read] = '\0';
+
+    // Mostrar contenido leído
+    printf("\nContenido leído desde el archivo:\n%s", buffer);
+
+    // Cerrar el archivo
+    close(fd);
 }
